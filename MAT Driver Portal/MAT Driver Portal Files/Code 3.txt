@@ -1,0 +1,248 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+
+namespace Sharan_Assignment1_BAP
+{
+    public partial class Welcome_Page : Form
+    {
+        //Field Variables
+        string DriverName;
+        string BusID;
+        public static int GlobalTotalDrivers = 0;
+        public static int GlobalTotalPassengers;
+        public decimal GlobalTotalCompanyReceipts;
+        public decimal GlobalFullFaresReceipts;
+        public decimal GlobalStudentFaresReceipts;
+        public decimal GlobalChildFaresReceipts;
+        public decimal GlobalFullFarePercent;
+        public decimal GlobalStudentFarePercent;
+        public decimal GlobalChildFarePercent;
+
+        public static int FullFares;
+        public static int StudentFares;
+        public static int ChildFares;
+        
+        // Constant Variables
+        const decimal FULL_FARE = 9.50m;
+        const decimal STUDENT_FARE = 6.75m;
+        const decimal CHILD_FARE = 4.75m;
+
+        public Welcome_Page()
+        {
+            InitializeComponent();
+        }
+
+        private void Welcome_Page_Load(object sender, EventArgs e)
+        {
+            MainPanel.Visible = true;
+            FaresPanel.Visible = false;
+        }
+        private void Page1_Panel_Paint(object sender, PaintEventArgs e)
+        {
+            DriverNameTextbox.Focus();
+        }
+        private void Proceed_button_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(DriverNameTextbox.Text) || String.IsNullOrEmpty(BusIDTextBox.Text))
+                {
+                    throw new Exception();
+                }
+                else
+                {
+                    //Local Varaiables
+                    string ZeroValue = "0";
+                    DriverName = DriverNameTextbox.Text;
+                    BusID = BusIDTextBox.Text;
+                    Welcome_Page.ActiveForm.Text = "Data Entry for Driver: " + DriverName + "  Bus ID: " + BusID;
+                    MainPanel.Visible = false;
+                    FaresPanel.Visible = true;
+                    DriverSummaryGroupBox.Visible = false;
+                    CompanySummaryGroupBox.Visible = false;
+                    DailyPassengersGroupBox.Show();
+                    FullFaresTextBox.Text = ZeroValue;
+                    FullFaresTextBox.Focus();
+                    StudentFaresTextBox.Text = ZeroValue;
+                    ChildFaresTextBox.Text = ZeroValue;
+                    if (GlobalTotalDrivers > 0)
+                    {
+                        SummaryButton.Enabled = true;
+                    }
+                }
+            }
+            catch
+            {
+                if (String.IsNullOrEmpty(DriverNameTextbox.Text))
+                {
+                    MessageBox.Show("Please Enter the Driver Name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    DriverNameTextbox.Focus();
+                }
+                else if(String.IsNullOrEmpty(BusIDTextBox.Text))
+                {
+                    MessageBox.Show("Please Enter the Bus ID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    BusIDTextBox.Focus();
+                }
+            }
+        }
+        
+        private void ProcessButton_Click_1(object sender, EventArgs e)
+        {
+            int TotalNumberOfpassengers;
+            decimal TotalDriverReceipts;
+
+
+            try
+            {
+                int FullFares = int.Parse(FullFaresTextBox.Text);
+                try
+                {
+                    int StudentFares = int.Parse(StudentFaresTextBox.Text);
+                    try
+                    {
+                        int ChildFares = int.Parse(ChildFaresTextBox.Text);
+
+                        TotalNumberOfpassengers = FullFares + StudentFares + ChildFares;
+                        TotalDriverReceipts = (FullFares * FULL_FARE) + (StudentFares * STUDENT_FARE) + (ChildFares * CHILD_FARE);
+
+                        try
+                        {
+                            if(TotalNumberOfpassengers>0)
+                            {
+                                Welcome_Page.ActiveForm.Text = "Driver Summary: " + DriverName + "  Bus ID: " + BusID;
+                                DailyPassengersGroupBox.Enabled = false;
+                                DriverSummaryGroupBox.Visible = true;
+
+                                decimal FullFareReceipts;
+                                decimal StudentFareReceipts;
+                                decimal ChildFareReceipts;
+                                decimal FullFarePercent;
+                                decimal StudentFarePercent;
+                                decimal ChildFarePercent;
+
+                                FullFareReceipts = FullFares * FULL_FARE;
+                                StudentFareReceipts = StudentFares * STUDENT_FARE;
+                                ChildFareReceipts = ChildFares * CHILD_FARE;
+
+                                FullFarePercent = (FullFareReceipts / TotalDriverReceipts) * 100;
+                                StudentFarePercent = (StudentFareReceipts / TotalDriverReceipts) * 100;
+                                ChildFarePercent = (ChildFareReceipts / TotalDriverReceipts) * 100;
+
+                                GlobalTotalDrivers = GlobalTotalDrivers + 1;
+                                GlobalTotalPassengers += TotalNumberOfpassengers;
+                                GlobalTotalCompanyReceipts += TotalDriverReceipts;
+                                GlobalFullFaresReceipts += FullFareReceipts;                                
+                                GlobalStudentFaresReceipts += StudentFareReceipts;                                
+                                GlobalChildFaresReceipts += ChildFareReceipts;
+
+                                TotalPassengersTextBox.Text = TotalNumberOfpassengers.ToString();
+                                TotalDriverReceiptsTextBox.Text = "€" + TotalDriverReceipts.ToString();
+                                FullFareReceiptsTextBox.Text = "€" + FullFareReceipts.ToString();
+                                StudentFareReceiptsTextBox.Text = "€" + StudentFareReceipts.ToString();
+                                ChildFareReceiptsTextBox.Text = "€" + ChildFareReceipts.ToString();
+
+                                FullFarePercentageTextBox.Text = Math.Round(FullFarePercent).ToString() + "%";
+                                StudentFarePercentageTextBox.Text = Math.Round(StudentFarePercent).ToString() + "%";
+                                ChildFarePercentageTextBox.Text = Math.Round(ChildFarePercent).ToString() + "%";                            
+                            }
+                            else
+                            {
+                                throw new Exception();
+                            }
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Please Enter atleast one Passenger", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            FullFaresTextBox.Focus();
+                            FullFaresTextBox.SelectAll();
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Please Enter Numerical Data for Child Passengers", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ChildFaresTextBox.Focus();
+                        ChildFaresTextBox.SelectAll();
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Please Enter Numerical Data for Student Passengers", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    StudentFaresTextBox.Focus();
+                    StudentFaresTextBox.SelectAll();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Please Enter Numerical Data for Full Passengers", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FullFaresTextBox.Focus();
+                FullFaresTextBox.SelectAll();
+            }           
+        }
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            // Toggling the Visibility
+            MainPanel.Visible = true;
+            FaresPanel.Visible = false;
+            DailyPassengersGroupBox.Enabled = true;
+
+            // Clearing the TextBoxes
+            DriverNameTextbox.Text = "";
+            BusIDTextBox.Text = "";
+            FullFaresTextBox.Text = "";
+            StudentFaresTextBox.Text = "";
+            ChildFaresTextBox.Text = "";
+            TotalPassengersTextBox.Text = "";
+            TotalDriverReceiptsTextBox.Text = "";
+            FullFareReceiptsTextBox.Text = "";
+            StudentFareReceiptsTextBox.Text = "";
+            ChildFareReceiptsTextBox.Text = "";
+            FullFarePercentageTextBox.Text = "";
+            StudentFarePercentageTextBox.Text = "";
+            ChildFarePercentageTextBox.Text = "";
+
+        }
+
+        private void SummaryButton_Click(object sender, EventArgs e)
+        {
+            // Changing the Form Heading
+            Welcome_Page.ActiveForm.Text = "MAT Summary Data";
+
+            // Toggling the Visibility
+            DailyPassengersGroupBox.Visible = false;
+            DriverSummaryGroupBox.Visible = false;
+            CompanySummaryGroupBox.Visible = true;
+
+            // Calculating the Total Fare Percentage 
+            GlobalFullFarePercent = (GlobalFullFaresReceipts / GlobalTotalCompanyReceipts) * 100;
+            GlobalStudentFarePercent = (GlobalStudentFaresReceipts / GlobalTotalCompanyReceipts) * 100;
+            GlobalChildFarePercent = (GlobalChildFaresReceipts / GlobalTotalCompanyReceipts) * 100;
+
+            // Assigning Values to the Company Summary Section
+            TotalDriversTextBox.Text = GlobalTotalDrivers.ToString();
+            TotalPassengersTextBox1.Text = GlobalTotalPassengers.ToString();
+            TotalCompanyReceiptsTextBox.Text = "€" + GlobalTotalCompanyReceipts.ToString();
+            FullFareReceiptsTextBox1.Text = "€" + GlobalFullFaresReceipts.ToString();
+            StudentFareReceiptsTextBox1.Text = "€" + GlobalStudentFaresReceipts.ToString();
+            ChildFareReceiptsTextBox1.Text = "€" + GlobalChildFaresReceipts.ToString();
+            FullFarePercentageTextBox1.Text = Math.Round(GlobalFullFarePercent).ToString() + "%";
+            StudentFarePercentageTextBox1.Text = Math.Round(GlobalStudentFarePercent).ToString() + "%";
+            ChildFarePercentageTextBox1.Text = Math.Round(GlobalChildFarePercent).ToString() + "%";
+        }
+        // Clicking on Exit Button
+        private void ExitButton_Click(object sender, EventArgs e)
+        {
+            // Closing the page
+            this.Close();
+        }
+    }
+}
+ 
